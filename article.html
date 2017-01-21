@@ -10,10 +10,6 @@
     <link rel="stylesheet" href="styles/SETT.css">
     <link rel="stylesheet" href="styles.css">
 
-    <!--Used for syntax highlighting.  -->
-    <link href="alexgorbatchev/shCore.css" rel="stylesheet">
-    <link href="alexgorbatchev/shThemeDefault.css" rel="stylesheet">
-
     <style>
       code {
         font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace !important;
@@ -25,6 +21,9 @@
         width: 400px;
       }
     </style>
+
+    <link rel="stylesheet" href="syntaxhighlighter/dist/theme.css">
+    <script src="syntaxhighlighter/dist/syntaxhighlighter.js"></script>
   </head>
   <body>
     <!--#include virtual="header.shtml" -->
@@ -37,7 +36,7 @@
       <br/>Object Computing, Inc. (OCI)
     </p>
 
-    <h2>Introduction</h2>
+    <h3>Introduction</h3>
     <p>
       Many people talk about how easy it is
       to build web applications using Node.js.
@@ -72,13 +71,13 @@
 <a href="https://github.com/brianc/node-postgres/wiki" target="_blank">https://github.com/brianc/node-postgres/wiki</a>.
     </p>
 
-    <h2>Author Reminders</h2>
+    <h3>Author Reminders</h3>
     <p>
       At end of each step where JavaScript code is written,
       write and run Jest tests.
     </p>
 
-    <h2>Preparation</h2>
+    <h3>Preparation</h3>
     <p>
       You will absorb more from this article if you run all the commands
       and create all the files as we walk through the process.
@@ -86,7 +85,7 @@
     <ol>
       <li>Open a Terminal window (macOS/Linux) or Command Prompt (Window).
         Throughout the remainder of this article
-        we'll refer to both as simple a terminal window.</li>
+        we'll refer to both as simply a terminal window.</li>
       <li>Create a directory to hold the project.</li>
       <li>cd into that a directory.</li>
     </ol>
@@ -117,7 +116,7 @@
       After the install completes, open a terminal and
       the enter the following to verify that it worked:
     </p>
-    <pre class="brush:js" xml:space="preserve">
+    <pre class="brush: js">
 node -v</pre>
     <p>
       Installing Node also installs npm which is the "Node Package Manager"
@@ -152,10 +151,10 @@ node -v</pre>
         This will ask several questions.
         It is okay to accept all the defaults.</li>
       <li>Create the file <code>index.js</code> and enter the following code:
-        <pre class="brush:js" xml:space="preserve">
+        <pre class="brush: js">
 const chalk = require('chalk');
 const name = process.argv[2];
-console.log('Hello, ' + chalk.red.bgYellow.bold(name) + '!');</pre>
+console.log('Hello, ' + chalk.red.bold(name) + '!');</pre>
         <p>
           <code>process.argv</code> holds command-line arguments.
           The first value is the path to the node executable.
@@ -184,14 +183,20 @@ console.log('Hello, ' + chalk.red.bgYellow.bold(name) + '!');</pre>
       <code>npm install express</code>.
       Place the following code in a file named <code>server.js</code>:
     </p>
-    <pre class="brush:js" xml:space="preserve">
+    <pre class="brush: js">
 const express = require('express');
 const app = express();
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/year', (req, res) => {
-  res.send(new Date().getFullYear().toString());
+app.get('/year', (request, response) => {
+  // request is an object that contains detail
+  // about the request that was received.
+  // response is an object that contains methods
+  // for populating the response to be sent.
+  // These are often abbreviated as "req" and "res"
+  // as you'll see in later code.
+  response.send(new Date().getFullYear().toString());
 });
 
 const PORT = 1919;
@@ -209,18 +214,20 @@ app.listen(PORT, () => {
       <li>Create a subdirectory named <code>public</code>.</li>
       <li>Create a file named <code>demo.html</code> in that directory.</li>
       <li>Add HTML to that file such as:
-        <pre class="brush:js" xml:space="preserve">
-&lt;h1>Serving files works!&lt;/h1></pre>
-</li>
+        <pre>&lt;h1>Serving files works!&lt;/h1></pre>
+      </li>
       <li>Browse <code>localhost:1919/demo.html.</code></li>
     </ol>
 
-    <h2>Database</h2>
+    <h3>Database</h3>
     <p>
-      The sample application uses the relational database PostgreSQL.
+      The sample application uses the relational database
+      <a href="https://www.postgresql.org/" target="_blank">PostgreSQL</a>.
       It is a very popular, open source database.
-      NoSQL databases are another excellent choice.
-      MongoDB is a NoSQL database that is popular in the Node community.
+      <a href="https://en.wikipedia.org/wiki/NoSQL" target="_blank">NoSQL</a>
+      databases are another excellent choice.
+      <a href="https://www.mongodb.com/" target="_blank">MongoDB</a>
+      is a NoSQL database that is popular in the Node community.
     </p>
 
     <p>
@@ -254,11 +261,16 @@ app.listen(PORT, () => {
     </p>
 
     <p>
+      We'll create three tables, <code>ice_cream</code>,
+      <code>users</code>, and a table for mapping users to
+      ice flavors named <code>user_ice_creams</code>.
+      We'll also enable the <code>pgcrypo</code> extension
+      so passwords can be encryped.
       Here is the Data Definition Language (DDL)
-      for creating the database we will use:
+      for creating these tables:
     </p>
-    <pre class="brush:js" xml:space="preserve">
-create extension pgcrypto; -- needed to use gen_random_uuid()
+    <pre class="brush: js">
+create extension pgcrypto; -- needed to encrypt passwords
 
 create table ice_creams (
   id serial primary key,
@@ -276,13 +288,13 @@ create table user_ice_creams (
 );</pre>
 
     <p>
-      Create a script that can be used to create the database
+      Create a script that will be used to create the database,
       and recreate it to get a fresh start during testing.
     </p>
     <ol>
       <li>Create the file by entering: <code>touch recreatedb</code></li>
       <li>Edit the file <code>recreatedb</code> and add the following lines:
-        <pre class="brush:js" xml:space="preserve">
+        <pre class="brush: js">
 db=ice_cream
 dropdb $db
 createdb $db
@@ -305,12 +317,427 @@ psql $db -f tables.ddl</pre>
       <li>To exit interactive mode, press ctrl-d.</li>
     </ol>
 
+    <h3>Node and PostgreSQL</h3>
+    <p>
+      Server connections to the database use the "root" role by default
+      and expect that it has superuser privilege.
+      This role doesn't exist by default.  To create it:
+    </p>
+    <pre>
+      createrole -s root</pre>
+
     <p>
       Many projects use Object/Relational Mapping (ORM) libraries
       to interact with relational databases rather than writing SQL.
       We forego that option here because SQL is a fairly universal skill
       and it is not hard to learn or use.
     </p>
+    <p>
+      To interactive with our PostgreSQL database from Node code
+      we will use the npm package
+      <a href="https://github.com/brianc/node-postgres" target="_blank">pg</a>.
+      To install it,
+    </p>
+    <pre>
+      npm install --save pg</pre>
+    <p>
+      Another similar npm package to consider is
+      <a href="https://github.com/vitaly-t/pg-promise" target="_blank">pg-promise</a>,
+      which is provides a promise-based API.
+      The next code example uses JavaScript promises.
+      If you aren't yet familiar with those, you can find what you need to know at
+      <a href="https://davidwalsh.name/promises" target="_blank">https://davidwalsh.name/promises</a>.
+    </p>
+    <p>
+      Before showing the code that uses pg,
+      let's look at how we would like to interact with the database.
+    </p>
+    <pre class="brush: js">
+const pg = require('./pg-simple');
+
+const tableName = 'ice_creams';
+const flavors = ['vanilla', 'chocolate', 'strawberry'];
+let ids;
+
+// Configure a connection to the database.
+pg.configure({
+  database: 'ice_cream'
+});
+
+// Delete all rows from the ice_cream table.
+pg.deleteAll(tableName)
+  // Insert three new rows corresponding to vanilla, chocolate, and strawberry.
+  .then(() => Promise.all(
+    flavors.map(f => pg.insert(tableName, {flavor: f}))
+  ))
+  // Get an array of the ids of the new rows.
+  .then(results => {
+    ids = results.map(result => result.rows[0].id);
+    console.log('inserted records with ids', ids);
+  })
+  // Delete the first row (vanilla).
+  .then(() => pg.deleteById(tableName, ids[0]))
+  // Change the flavor of the second row (chocolate) to "chocolate chip".
+  .then(() => pg.updateById(tableName, ids[1], {flavor: 'chocolate chip'}))
+  // Get all the rows in the table.
+  .then(() => pg.getAll(tableName))
+  // Output their id and flavor.
+  .then(result => {
+    for (const row of result.rows) {
+      console.log(row.id, row.flavor);
+    }
+  })
+  // Disconnect from the database.
+  .then(() => pg.disconnect())
+  // Catch and report any errors that occur in the previous steps.
+  .catch(err => {
+    throw err;
+  });</pre>
+
+    </p>
+      That's a nice API!  If only it existed.  Let's make it so.
+      Create the file <code>pg-simple.js</code>
+      and add the following code to it.
+    </p>
+    <pre class="brush: js">
+const pg = require('pg');
+const debug = false;
+
+let pool;
+
+/**
+ * Configures a connection pool.
+ */
+function configure(config) {
+  pool = new pg.Pool(config);
+}
+
+/**
+ * Helper function for working with ES6 promises.
+ */
+function handle(resolve, reject, err, result) {
+  if (err) {
+    reject(err);
+  } else {
+    resolve(result);
+  }
+}
+
+function log(...msg) {
+  if (debug) console.log('pg-simple.js:', msg.join(' '));
+}
+
+/**
+ * Deletes all records from a given table.
+ */
+function deleteAll(tableName) {
+  const sql = 'delete from ' + tableName;
+  log('deleteAll: sql =', sql);
+  return query(sql);
+}
+
+/**
+ * Deletes a record from a given table by id.
+ */
+function deleteById(tableName, id) {
+  const sql = `delete from ${tableName} where id=${id}`;
+  log('delete: sql =', sql);
+  return query(sql);
+}
+
+/**
+ * Disconnects from the database.
+ */
+function disconnect() {
+  log('disconnecting');
+  if (pool) pool.end();
+}
+
+/**
+ * Gets all records from a given table.
+ */
+function getAll(tableName) {
+  const sql = 'select * from ' + tableName;
+  log('getAll: sql =', sql);
+  return query(sql);
+}
+
+/**
+ * Gets a record from a given table by id.
+ */
+function getById(tableName, id) {
+  const sql = `select * from ${tableName} where id=${id}`;
+  log('getById: sql =', sql);
+  return query(sql);
+}
+
+/**
+ * Inserts a record into a given table.
+ */
+function insert(tableName, obj) {
+  const keys = Object.keys(obj);
+  const values = keys.map(key => obj[key]);
+  const cols = keys.join('');
+  const placeholders =
+    values.map((v, index) => '$' + (index + 1)).join('');
+  const sql =
+    `insert into ${tableName} (${cols}) values(${placeholders}) returning id`;
+  log('insert: sql =', sql);
+  return query(sql, ...values);
+}
+
+/**
+ * Executes a SQL query.
+ * This is used by several of the other functions.
+ */
+function query(sql, ...params) {
+  return new Promise((resolve, reject) => {
+    if (!pool) return reject('pool not configured');
+
+    pool.connect((err, client, done) => {
+      if (err) return reject(err);
+      log('query: sql =', sql);
+      client.query(sql, params, (err, result) => {
+        handle(resolve, reject, err, result);
+        done();
+      });
+    });
+  });
+}
+
+module.exports = {
+  configure, deleteAll, deleteById, disconnect,
+  getAll, getById, insert, query, updateById
+};</pre>
+
+    <h3>REST Services</h3>
+    <p>
+      Now that we have code for interacting with the database,
+      we can implement services to do this
+      that can be invoked from the browser.
+    </p>
+    <p>
+      REST stands for "REpresentational State Transfer".
+      To dig deeper into it, see
+      <a href="https://en.wikipedia.org/wiki/Representational_state_transfer" target="_blank">this</a>
+      Wikipedia page.
+      All you need to know for now is that REST services typically
+      use the HTTP/HTTPS protocol for request and response messages,
+      act on "resources", use carefully selected URLs to identify resources,
+      and map HTTP verbs to CRUD operations.
+      The mapping is as follows:
+    </p>
+    <ul>
+      <li>POST -> Create</li>
+      <li>GET -> Retrieve</li>
+      <li>PUT -> Update</li>
+      <li>DELETE -> Delete</li>
+      <li>POST -> everything else</li>
+    </ul>
+    <p>
+      There is an exception where PUT an be used to create a resource.
+      Also, PATCH can be used for a partial update.
+    </p>
+    <p>
+      We will implement the REST services using the npm package Express.
+      To install it, enter: <code>npm install --save express</code>
+    </p>
+    <p>
+      For the initial versions of these services we will not require
+      authentication or authorization.  Those features will be added later.
+      At first glance this may seem like a large amount of code.
+      However, I think you'll agree that each piece is fairly small and simple.
+    </p>
+    <pre class="brush: js">
+const express = require('express');
+const pg = require('./pg-simple');
+const server = require('./server');
+
+const app = express();
+server.setup(app);
+
+function handleError(res, err) {
+  res.statusMessage = `${err.toString()}; ${err.detail}`;
+  res.status(500).send();
+}
+
+// Must call this before other pg methods.
+pg.configure({
+  database: 'ice_cream' // defaults to username
+  //host: 'localhost', // default
+  //idleTimeoutMillis: 30000, // before a client is closed (default is 30000)
+  //max: 10, // max clients in pool (default is 10)
+  //password: '', // not needed in this example
+  //port: 5432, // the default
+  //user: '' // not needed in this example
+});
+
+/**
+ * Deletes an ice cream flavor from a given user.
+ */
+app.delete('/ice-cream/:username/:id', (req, res) => {
+  const {id, username} = req.params;
+
+  const sql =
+    'delete from user_ice_creams ' +
+    'where username=$1 and ice_cream_id=$2';
+  pg.query(sql, username, id)
+    .then(() => res.send())
+    .catch(handleError.bind(null, res));
+});
+
+/**
+ * Retrieves all records from the ice-cream table.
+ */
+app.get('/ice-cream/:username', (req, res) => {
+  const username = req.params.username;
+  const sql =
+    'select ic.id, ic.flavor ' +
+    'from ice_creams ic, user_ice_creams uic ' +
+    `where uic.username='${username}' ` +
+    'and uic.ice_cream_id=ic.id';
+  pg.query(sql)
+    .then(result => {
+      res.json(result.rows);
+    })
+    .catch(handleError.bind(null, res));
+});
+
+/**
+ * Adds an ice cream flavor for a given user,
+ * creating a new record in the ice-cream table.
+ */
+app.post('/ice-cream/:username', (req, res) => {
+  const {username} = req.params;
+  const {flavor} = req.query;
+
+  function associate(username, iceCreamId) {
+    const sql =
+      'insert into user_ice_creams (username, ice_cream_id) ' +
+      'values ($1, $2)';
+    pg.query(sql, username, iceCreamId)
+      .then(() => res.send(String(iceCreamId)))
+      .catch(handleError.bind(null, res));
+  }
+
+  // Get the id of the flavor if it already exists.
+  let sql = 'select id from ice_creams where flavor=$1';
+  pg.query(sql, flavor)
+    .then(result => {
+      const [row] = result.rows;
+      if (row) {
+        const {id} = row;
+        associate(username, id);
+      } else {
+        // The flavor doesn't exist, so create it.
+        sql = 'insert into ice_creams (flavor) values ($1) returning id';
+        pg.query(sql, flavor)
+          .then(result => {
+            const [row] = result.rows;
+            if (row) {
+              const {id} = row;
+              associate(username, id);
+            } else {
+              handleError(res, 'failed to create new flavor');
+            }
+          })
+          .catch(handleError.bind(null, res));
+      }
+    })
+    .catch(handleError.bind(null, res));
+});
+
+/**
+ * Updates a record in the ice-cream table by id.
+ */
+app.put('/ice-cream/:id', (req, res) => {
+  const {id} = req.params;
+  const {flavor} = req.query;
+  pg.updateById('ice_creams', id, {flavor})
+    .then(() => res.send())
+    .catch(handleError.bind(null, res));
+});
+
+server.start();</pre>
+
+    <p>
+      What about that "server" part we conveniently skipped over?
+      When the server is handling both the REST services and
+      the files that will be served to the browser
+      (such as <code>.html</code>, <code>.css</code>, and
+      <code>.js</code> files), it can be very simple.
+      However, if a separate server is used to serve those files
+      then CORS must be configured to allow code in the browser
+      to invoke the REST services.
+    </p>
+    <p>
+      CORS stands for "Cross-Origin Resource Sharing".
+      A standard security feature in browsers prevents
+      code downloaded from one domain to send requests
+      to another domain.  CORS can selectively enable this.
+      To learn more about CORS, see
+      <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank">this</a>
+      page on the Mozilla Developer Network.
+      For now all you need to know is that the REST server needs to
+      include certain headers in the responses it produces
+      to enable this.
+    </p>
+    <p>
+      Another feature the server may wish to configure
+      is the use of HTTPS instead of HTTP.
+      This uses Transport Layer Security (TLS) to
+      decrypt requests and encrypt responses.
+    </p>
+    <p>
+      Here is the code in <code>server.js</code>
+      that configures both CORS and HTTPS:
+    </p>
+    <pre class="brush: js">
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const https = require('https');
+const sio = require('socket.io');
+
+let server;
+
+function setup(app) {
+  // Suppress the x-powered-by response header
+  // so hackers don't get a clue that might help them.
+  app.set('x-powered-by', false);
+
+  // Enable use of CORS.
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers',
+      'Accept, Authorization, Content-Type, Origin, X-Requested-With');
+    res.header('Access-Control-Expose-Headers',
+      'Authorization, Content-Type');
+    res.header('Access-Control-Allow-Methods', 'GET,DELETE,POST,PUT');
+    next();
+  });
+
+  app.use(bodyParser.json({extended: true}));
+
+  const options = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem'),
+    passphrase: 'icecream'
+  };
+  server = https.createServer(options, app);
+  server.on('error', err => {
+    console.error(err.code === 'EACCES' ? 'must use sudo' : err);
+  });
+}
+
+function start() {
+  const PORT = 443;
+  server.listen(PORT, () => console.log('listening on port', PORT));
+
+  const io = sio.listen(server);
+  io.on('connection', socket => global.socket = socket);
+}
+
+module.exports = {setup, start};</pre>
 
     <h3>create-react-app</h3>
     <p>
@@ -334,100 +761,6 @@ psql $db -f tables.ddl</pre>
 
     <h1>YOU NEED A GOOD ERROR MESSAGE FROM THE SERVER WHEN IT CANNOT CONNECT TO THE DATABASE!</h1>
 
-    <p>Is the -w option needed to allow entering an SSL passphrase?</p>
-
-    <h3>Create database</h3>
-    <p>
-      Server connections to the database use the "root" role by default
-      and expect that it has superuser privilege.
-      This role doesn't exist by default.  To create it:
-    </p>
-    <pre>
-      createrole -s root</pre>
-    <p>
-      Create a new database named "web-app-steps":
-    </p>
-    <pre>
-      createdb web-app-steps</pre>
-    <p>
-      To list the existing databases and verify that this worked:
-    </p>
-    <pre>
-      psql -l</pre>
-    <p>
-      Later, if it is desired to delete the database:
-    </p>
-    <pre>
-      dropdb web-app-steps</pre>
-
-    <h3>Create tables</h3>
-    <p>
-      Create a file named <code>tables.ddl</code>
-      containing DDL for the tables to be created.
-      We'll create the <code>ice_cream</code> and <code>users</code> tables.
-      We'll also enable the <code>pgcrypo</code> extension
-      so passwords can be encryped.
-    </p>
-    <pre>
-      create extension pgcrypto;
-
-      drop table if exists ice_cream;
-      create table ice_cream (
-        id serial primary key,
-        flavor varchar(50)
-      );
-
-      drop table if exists users;
-      create table users (
-        id serial primary key,
-        username varchar(50),
-        password varchar(50)
-      );</pre>
-    <p>
-      To execute this DDL:
-    </p>
-    <pre>
-      psql web-app-steps -f tables.ddl</pre>
-    <p>
-      To list the tables in this database in PostgreSQL interactive mode:
-    </p>
-    <pre>
-      psql web-app-steps
-      \d
-      \d ice_cream</pre>
-    <p>
-      To list the columns in the ice_cream table:
-    </p>
-    <pre>
-      \d ice_cream</pre>
-    <p>
-      To exit PostgreSQL interactive mode, press ctrl-d.
-    </p>
-    <p>
-      Later if you need to delete the table,
-      say to recreate it with different columns:
-    </p>
-    <pre>
-      psql web-app-steps -c "drop table ice_cream"</pre>
-
-    <h3>Install node-postgres</h3>
-    <pre>
-      npm install --save pg</pre>
-    <p>
-      Also consider 
-      <a href="https://github.com/vitaly-t/pg-promise" target="_blank">pg-promise</a>,
-      which is a promise-based API for working with ProgreSQL databases.
-    </p>
-
-    <h3>Write code to perform CRUD operations on a database table</h3>
-    <pre>
-      npm install --save express</pre>
-    <p>
-      Create the file <code>database.js</code>
-      in the <code>src</code> directory
-      of the ice-cream-app project
-      and add the following code to it.
-    </p>
     <p>
       CORS stands for Cross-Origin Resource Sharing.
       It is needed to allow a web app to retrieve resources
@@ -471,6 +804,7 @@ Email Address []:{your-email}</pre>
       This creates the files <code>cert.pem</code> and <code>key.pem</code>
       in the current directory.
     </p>
+    <p>Is the -w option needed to allow entering an SSL passphrase?</p>
     <p>
       The standard port to use with SSL is 443.
       Since this is a protected port, the server must be started with sudo.
@@ -591,7 +925,7 @@ Email Address []:{your-email}</pre>
     <p>
     </p>
 
-    <h2>Summary</h2>
+    <h3>Summary</h3>
     <p>
     </p>
   </body>
