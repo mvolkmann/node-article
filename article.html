@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="description" content="Web App Step-By-Step">
+    <meta name="keywords" content="SETT, OCI, JavaScript, Node.js, React, PostgreSQL">
+    <meta name="author" content="R. Mark Volkmann">
+    <title>SETT ? 2017 - Web App Step-By-Step</title>
+
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="http://ociweb.com/sett/rss.xml">
+    <link rel="stylesheet" href="styles/SETT.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!--Used for syntax highlighting.  -->
+    <link href="alexgorbatchev/shCore.css" rel="stylesheet">
+    <link href="alexgorbatchev/shThemeDefault.css" rel="stylesheet">
+
+    <style>
+      code {
+        font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace !important;
+      }
+      #cra {
+        border: solid red 2px;
+        margin-top: 10px;
+        padding: 5px;
+        width: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--#include virtual="header.shtml" -->
+
+    <h1>Web App, Step By Step</h1>
+
+    <p class="author">
+      by<br/>
+      R. Mark Volkmann
+      <br/>Object Computing, Inc. (OCI)
+    </p>
+
+    <h2>Introduction</h2>
+    <p>
+      Many people talk about how easy it is
+      to build web applications using Node.js.
+      However, it's difficult to find resources that walk though all the steps.
+      We will do that here.
+      Some details will be omitted.
+      We want to focus on the primary steps.
+    </p>
+    <p>
+      This article makes specific technology/tool choices.
+      Obviously the steps differ if different choices are made.
+      The primary choices made here include Node.js, PostgreSQL, and React.
+      This article was inspired by the Frontend Masters workshop
+      "Zero to Production Node.js on Amazon Web Services" by Kevin Whinnery.
+      He made different tooling choices.
+    </p>
+    <p>
+      Ask Zach Klein to write a similar article using Grails.
+      What security and scaling issues does Grails address that you haven't?
+    </p>
+    <p>
+      For help with PostgreSQL see
+      <a href="https://www.postgresql.org/docs/9.6/static/index.html" target="_blank">https://www.postgresql.org/docs/9.6/static/index.html</a>.
+    </p>
+    <p>
+      For help on using the PostgreSQL psql command see
+      <a href="http://postgresguide.com/utilities/psql.html" target="_blank">http://postgresguide.com/utilities/psql.html</a>.
+    </p>
+    <p>
+      For help with node-postgres see
+<a href="https://github.com/brianc/node-postgres" target="_blank">https://github.com/brianc/node-postgres</a> and
+<a href="https://github.com/brianc/node-postgres/wiki" target="_blank">https://github.com/brianc/node-postgres/wiki</a>.
+    </p>
+
+    <h2>Author Reminders</h2>
+    <p>
+      At end of each step where JavaScript code is written,
+      write and run Jest tests.
+    </p>
+
+    <h2>Preparation</h2>
+    <p>
+      You will absorb more from this article if you run all the commands
+      and create all the files as we walk through the process.
+    </p>
+    <ol>
+      <li>Open a Terminal window (macOS/Linux) or Command Prompt (Window).
+        Throughout the remainder of this article
+        we'll refer to both as simple a terminal window.</li>
+      <li>Create a directory to hold the project.</li>
+      <li>cd into that a directory.</li>
+    </ol>
+
+    <h3>Node.js</h3>
+    <p>
+      Node can be used to develop many kinds of applications including
+      command-line apps, web apps (HTTP/HTTPS servers), and desktop apps (see
+      <a href="http://electron.atom.io/" target="_blank">http://electron.atom.io/</a>).
+      The main Node.js website is at
+      <a href="https://nodejs.org/" target="_blank">https://nodejs.org/</a>.
+      It contains this excellent summary:
+    </p>
+    <blockquote>
+      "Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine.
+      Node.js uses an event-driven, non-blocking I/O model
+      that makes it lightweight and efficient."
+    </blockquote>
+    <p>
+      The "DOCS" link at the top of this page contains excellent documentation.
+      Refer to this later when reading through the implementation
+      of our REST services.
+    </p>
+    <p>
+      Press the large green button that says "Current"
+      to download the current version of Node.js.
+      Double-click the file that is downloaded to run the installer.
+      After the install completes, open a terminal and
+      the enter the following to verify that it worked:
+    </p>
+    <pre class="brush:js" xml:space="preserve">
+node -v</pre>
+    <p>
+      Installing Node also installs npm which is the "Node Package Manager"
+      (despite claims to the contrary).  npm makes it easy to install
+      code libraries (a.k.a. packages) from the npm repository.
+      To discover the available packages, browse
+      <a href="https://www.npmjs.com/" target="_blank">https://www.npmjs.com/</a>.
+      As of the date of this article the npm repository
+      hosts over 350,000 packages.
+    </p>
+    <p>
+      Node applications typically have a file named <code>package.json</code>
+      that describes the app, including the packages on which it depends.
+      To create a <code>package.json</code> file for a new app,
+      enter <code>npm init</code>.
+      To install a dependency for an app
+      and record it in <code>package.json</code>,
+      enter <code>npm install -S <i>package</i></code>.
+      For dependencies related to development tasks that are not needed
+      when the app runs, use the <code>-D</code> option
+      instead of <code>-S</code>.
+    </p>
+    <p>
+      Here are the steps to build and run a "Hello World" command-line app.
+      It uses a library called chalk
+      (<a href="https://www.npmjs.com/package/chalk" target="_blank">https://www.npmjs.com/package/chalk</a>)
+      in order to demonstrate use of npm packages.
+    </p>
+    <ol>
+      <li>Create a directory for the app and cd to it.</li>
+      <li>Run <code>npm init</code> to create <code>package.json</code>.
+        This will ask several questions.
+        It is okay to accept all the defaults.</li>
+      <li>Create the file <code>index.js</code> and enter the following code:
+        <pre class="brush:js" xml:space="preserve">
+const chalk = require('chalk');
+const name = process.argv[2];
+console.log('Hello, ' + chalk.red.bgYellow.bold(name) + '!');</pre>
+        <p>
+          <code>process.argv</code> holds command-line arguments.
+          The first value is the path to the node executable.
+          The second value is the path to the file being executed.
+          The third value (at index 2) is the first command-line argument.
+        </p>
+      </li>
+      <li>To run this, enter <code>node index.js <i>your-name</i></code></li>
+    </ol>
+    <p>
+      A server is a program that listens for requests and produces responses.
+      The most common kind is an HTTP server that uses
+      request and repsonse messages with a specific format.
+      It can process requests for files and
+      process requests to perform specific operations.
+      Often processing involves interacting with a database
+      to perform CRUD operations.
+      CRUD stands for "Create Retrieve Update Delete" which are
+      the most common things one does with data.
+    </p>
+    <p>
+      Here is a simple example of a Node HTTP server that
+      serves files from a directory named "public"
+      and responds to requests for the current year.
+      It uses the express package which can be installed by entering
+      <code>npm install express</code>.
+      Place the following code in a file named <code>server.js</code>:
+    </p>
+    <pre class="brush:js" xml:space="preserve">
+const express = require('express');
+const app = express();
+
+app.use(express.static(__dirname + '/public'));
+
+app.get('/year', (req, res) => {
+  res.send(new Date().getFullYear().toString());
+});
+
+const PORT = 1919;
+app.listen(PORT, () => {
+  console.log('listenting on ' + PORT);
+});</pre>
+    <p>
+      To run this, enter <code>node server.js</code>
+      and browse <code>localhost:1919/year</code>.
+    </p>
+    <p>
+      To demonstrate serving files, follow these steps:
+    </p>
+    <ol>
+      <li>Create a subdirectory named <code>public</code>.</li>
+      <li>Create a file named <code>demo.html</code> in that directory.</li>
+      <li>Add HTML to that file such as:
+        <pre class="brush:js" xml:space="preserve">
+&lt;h1>Serving files works!&lt;/h1></pre>
+</li>
+      <li>Browse <code>localhost:1919/demo.html.</code></li>
+    </ol>
+
+    <h2>Database</h2>
+    <p>
+      The sample application uses the relational database PostgreSQL.
+      It is a very popular, open source database.
+      NoSQL databases are another excellent choice.
+      MongoDB is a NoSQL database that is popular in the Node community.
+    </p>
+
+    <p>
+      To install PostgreSQL in macOS:
+    </p>
+    <ol>
+      <li>
+        Install Homebrew by following the instructions at
+        <a href="http://brew.sh/" target="_blank">http://brew.sh/</a>.
+      </li>
+      <li>
+        Enter the following: <code>brew install postgresql</code>
+      </li>
+    </ol>
+    <p>
+      To install PostgreSQL in Windows:
+    </p>
+    <ol>
+      <li>
+        TODO: Get these steps.
+      </li>
+    </ol>
+
+    <p>
+      To start the database server, enter:
+      <code>pg_ctl -D /usr/local/var/postgres start</code>
+    </p>
+    <p>
+      To stop the database server later, enter:
+      <code>pg_ctl -D /usr/local/var/postgres stop -m fast</code>
+    </p>
+
+    <p>
+      Here is the Data Definition Language (DDL)
+      for creating the database we will use:
+    </p>
+    <pre class="brush:js" xml:space="preserve">
+create extension pgcrypto; -- needed to use gen_random_uuid()
+
+create table ice_creams (
+  id serial primary key,
+  flavor varchar(50)
+);
+
+create table users (
+  username varchar(50) primary key,
+  password varchar(60) -- encrypted length
+);
+
+create table user_ice_creams (
+  username varchar(50) references users (username),
+  ice_cream_id integer references ice_creams (id)
+);</pre>
+
+    <p>
+      Create a script that can be used to create the database
+      and recreate it to get a fresh start during testing.
+    </p>
+    <ol>
+      <li>Create the file by entering: <code>touch recreatedb</code></li>
+      <li>Edit the file <code>recreatedb</code> and add the following lines:
+        <pre class="brush:js" xml:space="preserve">
+db=ice_cream
+dropdb $db
+createdb $db
+psql $db -f tables.ddl</pre>
+      </li>
+      <li>Make this file executable by entering: <code>chmod a+x recreatedb</code></li>
+      <li>Execute this file by entering: <code>./recreatedb</code></li>
+    </ol>
+    <p>
+      Explore the newly created database with the following commands:<br>
+    </p>
+    <ol>
+      <li>To list the existing databases: <code>psql -l</code><br></li>
+      <li>To enter interactive mode for the ice_cream database: <code>psql -d ice_cream</code></li>
+      <li>To list the tables in the current database: <code>\d</code></li>
+      <li>To get information about the columns in the ice_creams table: <code>\d ice_creams</code></li>
+      <li>To get all the rows in the ice_creams table: <code>select * from ice_creams;</code><br>
+        Of course there is nothing to see yet, but try this again after our code adds data.
+      </li>
+      <li>To exit interactive mode, press ctrl-d.</li>
+    </ol>
+
+    <p>
+      Many projects use Object/Relational Mapping (ORM) libraries
+      to interact with relational databases rather than writing SQL.
+      We forego that option here because SQL is a fairly universal skill
+      and it is not hard to learn or use.
+    </p>
+
+    <h3>create-react-app</h3>
+    <p>
+      The easiest way to get started with a new React web app
+      is to use create-react-app at
+      <a href="https://github.com/facebookincubator/create-react-app" target="_blank">https://github.com/facebookincubator/create-react-app</a>.
+    </p>
+    <ol>
+      <li>To install create-react-app: <code>npm install -g create-react-app</code></li>
+      <li>To create our web application: <code>create-react-app ice-cream-app</code><br>
+        Depending on your computer, this will take around one minute.</li>
+      <li><code>cd ice-cream-app</code></li>
+      <li>To run the generated React app: <code>npm start</code><br>
+        You should see the following in your default web browser:<br>
+        <image id="cra" src="create-react-app.png"></li>
+      <li>Following the instructions on that page, edit src/App.js.
+        Change the line "Welcome to React" to "Welcome to Ice Cream".</li>
+      <li>When changes are saved, the browser window will automatically
+        refresh to show the results of the changes.</li>
+    </ol>
+
+    <h1>YOU NEED A GOOD ERROR MESSAGE FROM THE SERVER WHEN IT CANNOT CONNECT TO THE DATABASE!</h1>
+
+    <p>Is the -w option needed to allow entering an SSL passphrase?</p>
+
+    <h3>Create database</h3>
+    <p>
+      Server connections to the database use the "root" role by default
+      and expect that it has superuser privilege.
+      This role doesn't exist by default.  To create it:
+    </p>
+    <pre>
+      createrole -s root</pre>
+    <p>
+      Create a new database named "web-app-steps":
+    </p>
+    <pre>
+      createdb web-app-steps</pre>
+    <p>
+      To list the existing databases and verify that this worked:
+    </p>
+    <pre>
+      psql -l</pre>
+    <p>
+      Later, if it is desired to delete the database:
+    </p>
+    <pre>
+      dropdb web-app-steps</pre>
+
+    <h3>Create tables</h3>
+    <p>
+      Create a file named <code>tables.ddl</code>
+      containing DDL for the tables to be created.
+      We'll create the <code>ice_cream</code> and <code>users</code> tables.
+      We'll also enable the <code>pgcrypo</code> extension
+      so passwords can be encryped.
+    </p>
+    <pre>
+      create extension pgcrypto;
+
+      drop table if exists ice_cream;
+      create table ice_cream (
+        id serial primary key,
+        flavor varchar(50)
+      );
+
+      drop table if exists users;
+      create table users (
+        id serial primary key,
+        username varchar(50),
+        password varchar(50)
+      );</pre>
+    <p>
+      To execute this DDL:
+    </p>
+    <pre>
+      psql web-app-steps -f tables.ddl</pre>
+    <p>
+      To list the tables in this database in PostgreSQL interactive mode:
+    </p>
+    <pre>
+      psql web-app-steps
+      \d
+      \d ice_cream</pre>
+    <p>
+      To list the columns in the ice_cream table:
+    </p>
+    <pre>
+      \d ice_cream</pre>
+    <p>
+      To exit PostgreSQL interactive mode, press ctrl-d.
+    </p>
+    <p>
+      Later if you need to delete the table,
+      say to recreate it with different columns:
+    </p>
+    <pre>
+      psql web-app-steps -c "drop table ice_cream"</pre>
+
+    <h3>Install node-postgres</h3>
+    <pre>
+      npm install --save pg</pre>
+    <p>
+      Also consider 
+      <a href="https://github.com/vitaly-t/pg-promise" target="_blank">pg-promise</a>,
+      which is a promise-based API for working with ProgreSQL databases.
+    </p>
+
+    <h3>Write code to perform CRUD operations on a database table</h3>
+    <pre>
+      npm install --save express</pre>
+    <p>
+      Create the file <code>database.js</code>
+      in the <code>src</code> directory
+      of the ice-cream-app project
+      and add the following code to it.
+    </p>
+    <p>
+      CORS stands for Cross-Origin Resource Sharing.
+      It is needed to allow a web app to retrieve resources
+      (including REST service responses) that are hosted at a different domain
+      than the web app resources (including HTML, CSS, JavaScript, and media files).
+    </p>
+    <pre>
+      </pre>
+
+    <h3>Create a self-signed certificate</h3>
+    <p>
+      We want to used HTTPS for the website rather than HTTP
+      for security reasons.  This requires an SSL certificate.
+      For a real website this can be done for free using letsencrypt.org.
+      For testing purposes, an easier approach is to use openssl as follows:
+    </p>
+    <pre>
+$ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+Generating a 4096 bit RSA private key
+.................................++
+.................................++
+writing new private key to 'key.pem'
+Enter PEM pass phrase:
+Verifying - Enter PEM pass phrase:
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:{your-country-code}
+State or Province Name (full name) [Some-State]:{your-state}
+Locality Name (eg, city) []:{your-city}
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:{your-company}
+Organizational Unit Name (eg, section) []:{your-division}
+Common Name (e.g. server FQDN or YOUR name) []:{your-name}
+Email Address []:{your-email}</pre>
+    <p>
+      This creates the files <code>cert.pem</code> and <code>key.pem</code>
+      in the current directory.
+    </p>
+    <p>
+      The standard port to use with SSL is 443.
+      Since this is a protected port, the server must be started with sudo.
+      Otherwise the following error message will be output:
+      Error: listen EACCES 0.0.0.0:443
+    </p>
+    <pre>
+      sudo node server.js</pre>
+    <p>
+      If the passphrase is wrong, the following error will be reported:
+    </p>
+    <pre>
+      Error: error:06065064:digital envelope routines:EVP_DecryptFinal_ex:bad decrypt</pre>
+
+    <p>
+      When the protocol is https and default port (443) is used,
+      it does not need to be specified in URLs.
+      Use curl to test server routes like this:
+    </p>
+    <pre>
+      curl -k https://localhost/{route}</pre>
+    <p>
+      The <code>-k</code> (or <code>--insecure</code>) option
+      allows connections to SSL sites without certificates.
+      This is useful when testing using self-signed certificates.
+    </p>
+
+    <h3>Install Express</h3>
+    <pre>
+      npm install --save express</pre>
+    <p>
+      Express is a "fast, unopinionated, minimalist web framework for Node".
+      For more information, see
+      <a href="https://github.com/expressjs/express" target="_blank">https://github.com/expressjs/express</a>.
+    </p>
+
+    <h3>Install nodemon</h3>
+    <pre>
+      npm install --save-dev nodemon</pre>
+    <p>
+      Nodemon monitors files for changes and automatically restarts a server.
+      This is ideal while developing a server.
+      For more information, see
+      <a href="https://github.com/remy/nodemon" target="_blank">https://github.com/remy/nodemon</a>.
+    </p>
+
+    <h3>Write REST services</h3>
+    <p>
+      Create the file server.js.
+    </p>
+
+    <h3>Start express server</h3>
+    <p>
+      For development:
+    </p>
+    <pre>
+      cd server
+      sudo nodemon</pre>
+    <p>
+      For production:
+    </p>
+    <pre>
+      sudo node .</pre>
+
+    <h3>Write web app</h3>
+    <p>
+      Use create-react-app.
+    </p>
+    <p>
+      To start web server using HTTPS:
+    </p>
+    <pre>
+      export HTTPS=true
+      npm start
+      browse https://localhost:3000
+      press "Show Certificate" and select "Always Trust"</pre>
+    <p>
+      Tell browser to always trust the self-signed certificate
+      used by the REST server.
+      Browse https://localhost.
+
+      In Chrome, click the "ADVANCED" link,
+      click the "Proceed to localhost (unsafe)" link,
+      and ???.
+
+      In Firefox, press the "Advanced" button,
+      press the "Add Exception..." button,
+      and press the "Confirm Security Exception" button.
+
+      In Safari, press "Show Certificate" button.
+      In "When using this certificate" dropdown, select "Always Trust".
+      Press "Continue" button.
+      Enter your password to confirm this action.
+
+      To view and delete certificates from Chrome,
+      select "Chrome ... Preferences...", select "Settings",
+      scroll to bottom, click "Show advanced settings...",
+      scroll to "HTTPS/SSL", press the "Manage certificates..." button.
+      On a Mac this opens the "Keychain Access" application.
+
+      On a Mac, certificates can be viewed and deleted using the
+      "Keychain Access" app which is in Applications/Utilities.
+
+      After confirming the certificate,
+      browse https://localhost:3000 which is the web app URL.
+    </p>
+    <h3>Add authentication with Passport</h3>
+    <p>
+    </p>
+    <pre>
+      npm install --save passport passport-local</pre>
+
+    <h3>Wrap the application in a Docker container</h3>
+    <p>
+    </p>
+
+    <h3>Deploy the application somewhere</h3>
+    <p>
+    </p>
+
+    <h2>Summary</h2>
+    <p>
+    </p>
+  </body>
+</html>
