@@ -14,11 +14,11 @@
       code {
         font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace !important;
       }
-      #cra {
-        border: solid red 2px;
+      img {
+        border: solid lightgray 2px;
         margin-top: 10px;
         padding: 5px;
-        width: 400px;
+        width: 600px;
       }
     </style>
 
@@ -50,45 +50,27 @@
       Obviously the steps differ if different choices are made.
       The primary choices made here include Node.js, PostgreSQL, and React.
       This article was inspired by the Frontend Masters workshop
-      "Zero to Production Node.js on Amazon Web Services" by Kevin Whinnery.
-      He made different tooling choices.
+      "Zero to Production Node.js on Amazon Web Services" by Kevin Whinnery
+      where he made different tooling choices.
+    </p>
+    <p>
+      The example application presented in this article is avaiable at
+      <a href="https://github.com/mvolkmann/ice-cream-app" target="_blank">https://github.com/mvolkmann/ice-cream-app</a>.
+    </p>
+    <p>
+      You will absorb more from this article if you run all the commands
+      and download/create all the files as we walk through the process.
+      If you are working on a Windows machine,
+      most of the steps will be performed in a Command Prompt window.
+      If you are working on a Mac or Linux machine,
+      most of the steps will be performed in a Terminal window.
+      Throughout the remainder of this article
+      we'll refer to both as simply a "terminal".
     </p>
     <p>
       Ask Zach Klein to write a similar article using Grails.
       What security and scaling issues does Grails address that you haven't?
     </p>
-    <p>
-      For help with PostgreSQL see
-      <a href="https://www.postgresql.org/docs/9.6/static/index.html" target="_blank">https://www.postgresql.org/docs/9.6/static/index.html</a>.
-    </p>
-    <p>
-      For help on using the PostgreSQL psql command see
-      <a href="http://postgresguide.com/utilities/psql.html" target="_blank">http://postgresguide.com/utilities/psql.html</a>.
-    </p>
-    <p>
-      For help with node-postgres see
-<a href="https://github.com/brianc/node-postgres" target="_blank">https://github.com/brianc/node-postgres</a> and
-<a href="https://github.com/brianc/node-postgres/wiki" target="_blank">https://github.com/brianc/node-postgres/wiki</a>.
-    </p>
-
-    <h3>Author Reminders</h3>
-    <p>
-      At end of each step where JavaScript code is written,
-      write and run Jest tests.
-    </p>
-
-    <h3>Preparation</h3>
-    <p>
-      You will absorb more from this article if you run all the commands
-      and create all the files as we walk through the process.
-    </p>
-    <ol>
-      <li>Open a Terminal window (macOS/Linux) or Command Prompt (Window).
-        Throughout the remainder of this article
-        we'll refer to both as simply a terminal window.</li>
-      <li>Create a directory to hold the project.</li>
-      <li>cd into that a directory.</li>
-    </ol>
 
     <h3>Node.js</h3>
     <p>
@@ -179,8 +161,13 @@ console.log('Hello, ' + chalk.red.bold(name) + '!');</pre>
       Here is a simple example of a Node HTTP server that
       serves files from a directory named "public"
       and responds to requests for the current year.
-      It uses the express package which can be installed by entering
-      <code>npm install express</code>.
+      It uses the Express package which is a
+      "fast, unopinionated, minimalist web framework for Node".
+      For more information, see
+      <a href="https://github.com/expressjs/express" target="_blank">https://github.com/expressjs/express</a>.
+      To install it, enter the following from your app directory: <code>npm install express</code>
+    </p>
+    <p>
       Place the following code in a file named <code>server.js</code>:
     </p>
     <pre class="brush: js">
@@ -230,6 +217,19 @@ app.listen(PORT, () => {
       is a NoSQL database that is popular in the Node community.
     </p>
 
+    <p>
+      For help with PostgreSQL see
+      <a href="https://www.postgresql.org/docs/9.6/static/index.html" target="_blank">https://www.postgresql.org/docs/9.6/static/index.html</a>.
+    </p>
+    <p>
+      For help on using the PostgreSQL psql command see
+      <a href="http://postgresguide.com/utilities/psql.html" target="_blank">http://postgresguide.com/utilities/psql.html</a>.
+    </p>
+    <p>
+      For help with pg, an npm package for iteracting with PostgreSQL databases, see
+      <a href="https://github.com/brianc/node-postgres" target="_blank">https://github.com/brianc/node-postgres</a> and
+      <a href="https://github.com/brianc/node-postgres/wiki" target="_blank">https://github.com/brianc/node-postgres/wiki</a>.
+    </p>
     <p>
       To install PostgreSQL in macOS:
     </p>
@@ -333,23 +333,21 @@ psql $db -f tables.ddl</pre>
       and it is not hard to learn or use.
     </p>
     <p>
-      To interactive with our PostgreSQL database from Node code
+      To interact with our PostgreSQL database from Node code
       we will use the npm package
       <a href="https://github.com/brianc/node-postgres" target="_blank">pg</a>.
-      To install it,
     </p>
-    <pre>
-      npm install --save pg</pre>
     <p>
       Another similar npm package to consider is
       <a href="https://github.com/vitaly-t/pg-promise" target="_blank">pg-promise</a>,
       which is provides a promise-based API.
       The next code example uses JavaScript promises.
+      Understanding JavaScript promises is essential to following the code here.
       If you aren't yet familiar with those, you can find what you need to know at
       <a href="https://davidwalsh.name/promises" target="_blank">https://davidwalsh.name/promises</a>.
     </p>
     <p>
-      Before showing the code that uses pg,
+      Before showing the code that uses the pg package,
       let's look at how we would like to interact with the database.
     </p>
     <pre class="brush: js">
@@ -394,7 +392,7 @@ pg.deleteAll(tableName)
     throw err;
   });</pre>
 
-    </p>
+    <p>
       That's a nice API!  If only it existed.  Let's make it so.
       Create the file <code>pg-simple.js</code>
       and add the following code to it.
@@ -539,19 +537,25 @@ module.exports = {
       Also, PATCH can be used for a partial update.
     </p>
     <p>
-      We will implement the REST services using the npm package Express.
-      To install it, enter: <code>npm install --save express</code>
+      We will implement the REST services using the npm package Express
+      which was described earlier.
     </p>
     <p>
-      For the initial versions of these services we will not require
-      authentication or authorization.  Those features will be added later.
+      These services require authentication.
+      Note how each checks for this with a call to auth.authorize
+      and returns if that returns false.
       At first glance this may seem like a large amount of code.
       However, I think you'll agree that each piece is fairly small and simple.
     </p>
     <pre class="brush: js">
+const auth = require('node-token-auth');
 const express = require('express');
 const pg = require('./pg-simple');
 const server = require('./server');
+
+// Configure the algorithm and password used to encrypt auth tokens
+// and set the session timeout in minutes.
+auth.configure('aes-256-ctr', 'V01kmann', 1);
 
 const app = express();
 server.setup(app);
@@ -576,6 +580,8 @@ pg.configure({
  * Deletes an ice cream flavor from a given user.
  */
 app.delete('/ice-cream/:username/:id', (req, res) => {
+  if (!auth.authorize(req, res)) return;
+
   const {id, username} = req.params;
 
   const sql =
@@ -590,6 +596,8 @@ app.delete('/ice-cream/:username/:id', (req, res) => {
  * Retrieves all records from the ice-cream table.
  */
 app.get('/ice-cream/:username', (req, res) => {
+  if (!auth.authorize(req, res)) return;
+
   const username = req.params.username;
   const sql =
     'select ic.id, ic.flavor ' +
@@ -608,6 +616,8 @@ app.get('/ice-cream/:username', (req, res) => {
  * creating a new record in the ice-cream table.
  */
 app.post('/ice-cream/:username', (req, res) => {
+  if (!auth.authorize(req, res)) return;
+
   const {username} = req.params;
   const {flavor} = req.query;
 
@@ -651,9 +661,88 @@ app.post('/ice-cream/:username', (req, res) => {
  * Updates a record in the ice-cream table by id.
  */
 app.put('/ice-cream/:id', (req, res) => {
+  if (!auth.authorize(req, res)) return;
+
   const {id} = req.params;
   const {flavor} = req.query;
   pg.updateById('ice_creams', id, {flavor})
+    .then(() => res.send())
+    .catch(handleError.bind(null, res));
+});
+
+/**
+ * Logs in a user.
+ * curl -k -XPOST https://localhost/login ...
+ * The username and password must be in the body
+ * and the content type must be "application/json".
+ */
+app.post('/login', (req, res) => {
+  const {username, password} = req.body;
+  if (!username) {
+    res.statusMessage = 'Missing Username';
+    return res.status(400).send();
+  }
+  if (!password) {
+    res.statusMessage = 'Missing Password';
+    return res.status(400).send();
+  }
+
+  auth.generateToken(username, req, res);
+
+  const sql =
+    `select password = crypt('${password}', password) as authenticated ` +
+    `from users where username='${username}'`;
+  pg.query(sql)
+    .then(result => {
+      const [row] = result.rows;
+      if (row) {
+        res.send(row.authenticated);
+      } else {
+        res.statusMessage = 'Username Not Found';
+        res.status(404).send();
+      }
+    })
+    .catch(handleError.bind(null, res));
+});
+
+/**
+ * Logs out a user.
+ * curl -k -XPOST https://localhost/logout ...
+ * The "Authorization" request header must be set.
+ */
+app.post('/logout', (req, res) => {
+  if (!auth.authorize(req, res)) return;
+
+  auth.deleteToken(req);
+  res.send();
+});
+
+/**
+ * Signs up a new user.
+ * curl -k -XPOST https://localhost/signup ...
+ * The username and password must be in the body
+ * and the content type must be "application/json".
+ */
+app.post('/signup', (req, res) => {
+  const {username, password} = req.body;
+  if (!username) {
+    res.statusMessage = 'Missing Username';
+    return res.status(400).send();
+  }
+  if (!password) {
+    res.statusMessage = 'Missing Password';
+    return res.status(400).send();
+  }
+
+  auth.generateToken(username, req, res);
+
+  // Encrypt password using a Blowfish-based ciper (bf)
+  // performing 8 iterations.
+  const sql =
+    'insert into users (username, password) ' +
+    `values('${username}', crypt('${password}', gen_salt('bf', 8)))`;
+
+  pg.query(sql)
     .then(() => res.send())
     .catch(handleError.bind(null, res));
 });
@@ -670,10 +759,15 @@ server.start();</pre>
       then CORS must be configured to allow code in the browser
       to invoke the REST services.
     </p>
+
     <p>
       CORS stands for "Cross-Origin Resource Sharing".
+      It is needed to allow the client-side of a web app to retrieve resources
+      (including REST service responses) that are hosted at a different domain
+      than the client-side resource
+      (such as HTML, CSS, JavaScript, and media files).
       A standard security feature in browsers prevents
-      code downloaded from one domain to send requests
+      code downloaded from one domain from sending requests
       to another domain.  CORS can selectively enable this.
       To learn more about CORS, see
       <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank">this</a>
@@ -683,7 +777,7 @@ server.start();</pre>
       to enable this.
     </p>
     <p>
-      Another feature the server may wish to configure
+      Another feature our server configures
       is the use of HTTPS instead of HTTP.
       This uses Transport Layer Security (TLS) to
       decrypt requests and encrypt responses.
@@ -739,42 +833,35 @@ function start() {
 
 module.exports = {setup, start};</pre>
 
-    <h3>create-react-app</h3>
-    <p>
-      The easiest way to get started with a new React web app
-      is to use create-react-app at
-      <a href="https://github.com/facebookincubator/create-react-app" target="_blank">https://github.com/facebookincubator/create-react-app</a>.
-    </p>
-    <ol>
-      <li>To install create-react-app: <code>npm install -g create-react-app</code></li>
-      <li>To create our web application: <code>create-react-app ice-cream-app</code><br>
-        Depending on your computer, this will take around one minute.</li>
-      <li><code>cd ice-cream-app</code></li>
-      <li>To run the generated React app: <code>npm start</code><br>
-        You should see the following in your default web browser:<br>
-        <image id="cra" src="create-react-app.png"></li>
-      <li>Following the instructions on that page, edit src/App.js.
-        Change the line "Welcome to React" to "Welcome to Ice Cream".</li>
-      <li>When changes are saved, the browser window will automatically
-        refresh to show the results of the changes.</li>
-    </ol>
+    <h3>YOU NEED A GOOD ERROR MESSAGE FROM THE SERVER WHEN IT CANNOT CONNECT TO THE DATABASE!</h3>
 
-    <h1>YOU NEED A GOOD ERROR MESSAGE FROM THE SERVER WHEN IT CANNOT CONNECT TO THE DATABASE!</h1>
-
+    <h3>Authentication and Authorization</h3>
     <p>
-      CORS stands for Cross-Origin Resource Sharing.
-      It is needed to allow a web app to retrieve resources
-      (including REST service responses) that are hosted at a different domain
-      than the web app resources (including HTML, CSS, JavaScript, and media files).
+      We want to require users to register for an account before using the app.
+      They do this by supplying a username and password of their choosing,
+      after which they are automatically logged in.
+      Login is required for all subsequent sessions.
     </p>
-    <pre>
-      </pre>
+    <p>
+      Both registering a new account and logging in to an existing account
+      result in an authentication token being returned to the browser.
+      The client-side code must include this token in all REST calls.
+      This is supported by the npm package <code>node-token-auth</code> at
+      <a href="https://www.npmjs.com/package/node-token-auth" target="_blank">https://www.npmjs.com/package/node-token-auth</a>
+      The content of the encrypted tokens it creates is explained there.
+      I created <code>node-token-auth</code> for this article.  Check it out!
+    </p>
+    <p>
+      Another popular authentication option for Node is Passport at
+      <a href="http://passportjs.org/" target="_blank">http://passportjs.org/</a>.
+    </p>
 
     <h3>Create a self-signed certificate</h3>
     <p>
       We want to used HTTPS for the website rather than HTTP
       for security reasons.  This requires an SSL certificate.
-      For a real website this can be done for free using letsencrypt.org.
+      For a real website this can be done for free using
+      <a href="https://letsencrypt.org/" target="_blank">https://letsencrypt.org/</a>.
       For testing purposes, an easier approach is to use openssl as follows:
     </p>
     <pre>
@@ -811,8 +898,6 @@ Email Address []:{your-email}</pre>
       Otherwise the following error message will be output:
       Error: listen EACCES 0.0.0.0:443
     </p>
-    <pre>
-      sudo node server.js</pre>
     <p>
       If the passphrase is wrong, the following error will be reported:
     </p>
@@ -822,7 +907,9 @@ Email Address []:{your-email}</pre>
     <p>
       When the protocol is https and default port (443) is used,
       it does not need to be specified in URLs.
-      Use curl to test server routes like this:
+    </p>
+    <p>
+      The curl command can be used test REST services like this:
     </p>
     <pre>
       curl -k https://localhost/{route}</pre>
@@ -832,90 +919,696 @@ Email Address []:{your-email}</pre>
       This is useful when testing using self-signed certificates.
     </p>
 
-    <h3>Install Express</h3>
-    <pre>
-      npm install --save express</pre>
+    <h3>Running the Sample App</h3>
     <p>
-      Express is a "fast, unopinionated, minimalist web framework for Node".
-      For more information, see
-      <a href="https://github.com/expressjs/express" target="_blank">https://github.com/expressjs/express</a>.
+      In the next section we will discuss the implementation of a web UI.
+      It will aid your understanding to install and run the app now.
+      Here are the steps to do that:
+    </p>
+    <ol>
+      <li>Open a terminal.</li>
+      <li>
+        Start the database daemon with:<br>
+        <code>pg_ctl -D /usr/local/var/postgres start</code>
+      </li>
+      <li>cd to the directory where you'd like to install the project.</li>
+      <li>git clone https://github.com/mvolkmann/ice-cream-app.git</li>
+      <li>Enter: <code>cd ice-cream-app/server</code></li>
+      <li>
+        Enter: <code>npm install</code><br>
+        This installs all the dependencies found in
+        <code>ice-cream-app/server/package.json</code>.
+      </li>
+      <li>
+        Start the REST server by entering: <code>npm start</code><br>
+        Another way to start the REST server is to use nodemon
+        which is described <a href="#nodemon">later</a>.
+      </li>
+      <li>Enter: <code>cd ..</code></li>
+      <li>
+        Enter: <code>npm install</code><br>
+        This installs all the dependencies found in
+        <code>ice-cream-app/package.json</code>.
+      </li>
+      <li>
+        Configure the use HTTPS by the web server (instead of HTTP) by entering:
+        <code>export HTTPS=true</code>
+      </li>
+      <li>
+        Start the web server by entering: <code>npm start</code></li>
+      <li>
+        Tell browser to always trust the self-signed certificate by
+        browsing https://localhost.
+      </li>
+      <li>
+        <p>
+          In Chrome, click "ADVANCED" and then "Proceed to localhost (unsafe)".
+        </p>
+        <p>
+          In Firefox, press the "Advanced" button,
+          press the "Add Exception..." button,
+          and press the "Confirm Security Exception" button.
+        </p>
+        <p>
+          In Safari, press "Show Certificate" button.
+          In "When using this certificate" dropdown, select "Always Trust".
+          Press "Continue" button.
+          Enter your password to confirm this action.
+        </p>
+      </li>
+      <li>
+        Browse https://localhost:3000<br>
+        Do you need to enable HTTPS again here?
+     </li>
+    </ol>
+
+    <h3>create-react-app</h3>
+    <p>
+      The easiest way to get started with a new React web app
+      is to use create-react-app at
+      <a href="https://github.com/facebookincubator/create-react-app" target="_blank">https://github.com/facebookincubator/create-react-app</a>.
+    </p>
+    <ol>
+      <li>To install create-react-app: <code>npm install -g create-react-app</code></li>
+      <li>
+        To create our web application: <code>create-react-app ice-cream-app</code><br>
+        Depending on your computer, this will take around one minute.
+      </li>
+      <li><code>cd ice-cream-app</code></li>
+      <li>
+        To run the generated React app: <code>npm start</code><br>
+        You should see the following in your default web browser:<br>
+        <img alt="create-react-app first page"
+          src="images/create-react-app.png">
+      </li>
+      <li>
+        Following the instructions on that page, edit src/App.js.
+        Change the line "Welcome to React" to "Welcome to Ice Cream".
+      </li>
+      <li>
+        When changes are saved, the browser window will automatically
+        refresh to show the results of the changes.
+      </li>
+    </ol>
+
+    <h3>Ice Cream App UI</h3>
+    <p>
+      Our UI will consist of two pages.
+      The first page is for user registration and login.
+    </p>
+    <img alt="Ice Cream App Login Page"
+      src="images/ice-cream-login.png">
+
+    <p>
+      The second page is reached after successful user registration or login.
+      It allows the user to add and delete ice cream flavors.
+      Pressing the "Log out" button in the upper-right corner
+      ends their session and returns them to the login page.
+    </p>
+    <img alt="Ice Cream App Flavors Page"
+      src="images/ice-cream-flavors.png">
+
+    <p>
+      Going into the details of React is beyond the scope of this article.
+      However, hopefully the code will be readable even for those
+      without React exposure.  The code is heavily commented.
+      If you are not particularly interested in learning about React,
+      scan though the code to see where the REST calls are made
+      and how the responses are handled.
     </p>
 
-    <h3>Install nodemon</h3>
-    <pre>
-      npm install --save-dev nodemon</pre>
+    <h4>public/index.html</h4>
     <p>
-      Nodemon monitors files for changes and automatically restarts a server.
-      This is ideal while developing a server.
-      For more information, see
-      <a href="https://github.com/remy/nodemon" target="_blank">https://github.com/remy/nodemon</a>.
+      This is a slightly modified version of the one generated by create-react-app:
+    </p>
+    <pre class="brush: js">
+&lt;!doctype html>
+&lt;html lang="en">
+  &lt;head>
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1">
+
+    &lt;!--
+      Notice the use of %PUBLIC_URL% in the tag below.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+    -->
+    &lt;link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+
+    &lt;title>React App&lt;/title>
+
+    &lt;!--
+      This was added to allow the client to listen to
+      socket.io events emitted from the server.  It is used to
+      proactively terminate sessions when the session timeout expires.
+    -->
+    &lt;script src="https://localhost/socket.io/socket.io.js">&lt;/script>
+  &lt;/head>
+  &lt;body>
+    &lt;!--
+      This element is populated by React.
+      See the reference to 'root' in src/index.js.
+    -->
+    &lt;div id="root">&lt;/div>
+  &lt;/body>
+&lt;/html>
+</pre>
+
+    <h4>src/index.js</h4>
+    <p>
+      This file was generated by create-react-app.
+      It is the first JavaScript file that is loaded.
+      The file <code>index.html</code> doesn't include a script tag for this.
+      create-react-app causes this to be loaded.
+      It is specified in
+      <code>node_modules/react-scripts/config/paths.js</code>
+      as <code>appIndexJs</code> and used in
+      <code>webpack.config.*.js</code> in that same directory.
+      Note that this file imports <code>App.js</code>.
+    </p>
+    <pre class="brush: js">
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import './index.css';
+
+// This creates an instance of the App component and renders it
+// inside the div with an id of "root" in public/index.html.
+ReactDOM.render(
+  &lt;App/>,
+  document.getElementById('root')
+);
+</pre>
+
+    <h4>src/App.js</h4>
+    <p>
+      This is a heavily modified version of the one generated by create-react-app.
+      See the comments for details.
+    </p>
+    <pre class="brush: js">
+import React, {Component} from 'react';
+import Login from './login';
+import Main from './main';
+import 'whatwg-fetch';
+import './App.css';
+
+class App extends Component {
+  constructor() {
+    super();
+
+    // Redux is a popular library for managing state in a React application.
+    // This application, being somewhat small, opts for a simpler approach
+    // where the top-most component manages all of the state.
+    // Placing a bound version of the setState method on the React object
+    // allows other components to call it in order to modify state.
+    // Each call causes the UI to re-render.
+    React.setState = this.setState.bind(this);
+
+    // This gets a socket.io connection from the server
+    // and registers for "session-timeout" events.
+    // If one is received, the users is logged out.
+    /* global io */
+    const socket = io('https://localhost', {secure: true});
+    socket.on('session-timeout', () => {
+      alert('Your session timed out.');
+      this.logout();
+    });
+  }
+
+  // This is the initial state of the application.
+  state = {
+    authenticated: false,
+    error: '',
+    flavor: '',
+    iceCreamMap: {},
+    password: '',
+    restUrl: 'https://localhost',
+    route: 'login', // controls the current page
+    token: '',
+    username: ''
+  };
+
+  /**
+   * Sends a logout POST request to the server
+   * and goes to the login page.
+   */
+  logout = () => {
+    /* eslint-disable no-invalid-this */
+    const url = `${this.state.restUrl}/logout`;
+    const headers = {Authorization: this.state.token};
+    fetch(url, {method: 'POST', headers})
+      .then(() => React.setState({
+        authenticated: false,
+        route: 'login',
+        password: '',
+        username: ''
+      }))
+      .catch();
+  };
+
+  render() {
+    // Use destructuring to extract data from the state object.
+    const {
+      authenticated, error, flavor, iceCreamMap,
+      password, restUrl, route, token, username
+    } = this.state;
+
+    return (
+      &lt;div className="App">
+        &lt;header>
+          &lt;img className="header-img" src="ice-cream.png" alt="ice cream"/>
+          Ice cream, we all scream for it!
+          {
+            authenticated ?
+              &lt;button onClick={this.logout}>Log out&lt;/button> :
+              null
+          }
+        &lt;/header>
+        &lt;div className="App-body">
+          {
+            // This is an alternative to controlling routing to pages
+            // that is far simpler than more full-blown solutions
+            // like react-router.
+            route === 'login' ?
+              &lt;Login
+                username={username}
+                password={password}
+                restUrl={restUrl}
+              /> :
+            route === 'main' ?
+              &lt;Main
+                flavor={flavor}
+                iceCreamMap={iceCreamMap}
+                restUrl={restUrl}
+                token={token}
+                username={username}
+              /> :
+              &lt;div>Unknown route {route}&lt;/div>
+          }
+          {
+            // If an error has occurred, render it at the bottom of any page.
+            error ? &lt;div className="error">{error}&lt;/div> : null
+          }
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+}
+
+export default App;</pre>
+
+    <h4>src/App.css</h4>
+    <p>
+      All the CSS for this app resides here,
+      with the exception of <code>src/index.css</code> which is
+      generated by create-react-app and doesn't require modification..
+      It is outside of the scope of this article to cover CSS,
+      but the source can be found in the
+      <a href="https://github.com/mvolkmann/ice-cream-app/blob/master/src/App.css" target="_blank">Github repo</a>.
     </p>
 
-    <h3>Write REST services</h3>
+    <h4>src/login.js</h4>
     <p>
-      Create the file server.js.
+      This component allows new users to signup and
+      existing users to log in.
+    </p>
+    <pre class="brush: js">
+import React, {Component} from 'react';
+import 'whatwg-fetch'; // sends HTTP requests
+
+const {string} = React.PropTypes;
+
+function onChangePassword(event) {
+  React.setState({password: event.target.value});
+}
+
+function onChangeUsername(event) {
+  React.setState({username: event.target.value});
+}
+
+/* eslint-disable no-invalid-this */
+class Login extends Component {
+
+  static propTypes = {
+    password: string.isRequired,
+    restUrl: string.isRequired,
+    username: string.isRequired
+  };
+
+  // This is called when the "Log In" button is pressed.
+  onLogin = () => {
+    const {password, restUrl, username} = this.props;
+    let token;
+    const url = `${restUrl}/login`;
+
+    // Send username and password to login REST service.
+    fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username, password})
+    })
+      .then(res => {
+        token = res.headers.get('Authorization');
+        return res.text(); // returns a promise
+      })
+      .then(text => {
+        const authenticated = text === 'true';
+        React.setState(authenticated ?
+          {
+            authenticated: true,
+            error: null, // clear previous error
+            route: 'main',
+            token
+          } :
+          {
+            error: 'Invalid username or password.'
+          });
+      })
+      .catch(res => {
+        React.setState({error: `${url}; ${res.message}`});
+      });
+  }
+
+  // This is called when the "Signup" button is pressed.
+  onSignup = () => {
+    const {password, restUrl, username} = this.props;
+    let token;
+    const url = `${restUrl}/signup`;
+    let error = false;
+
+    fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username, password})
+    })
+      .then(res => {
+        token = res.headers.get('Authorization');
+        if (!res.ok) error = true;
+        return res.text(); // returns a promise
+      })
+      .then(text => {
+        if (error) {
+          if (/duplicate key/.test(text)) {
+            text = `User ${username} already exists.`;
+          }
+          React.setState({error: text});
+        } else { // successful signup
+          React.setState({error: null, route: 'main', token, username});
+        }
+      })
+      .catch(res => {
+        React.setState({error: `${url}; ${res.message}`});
+      });
+  }
+
+  render() {
+    const {password, username} = this.props;
+    const canSubmit = username &amp;&amp; password;
+
+    // We are handling sending the username and password
+    // to a REST service above, so we don't want
+    // the HTML form to submit anything for us.
+    // That is the reason for the call to preventDefault.
+    return (
+      &lt;form className="login-form"
+        onSubmit={event => event.preventDefault()}>
+        &lt;div className="row">
+          &lt;label>Username:&lt;/label>
+          &lt;input type="text"
+            autoFocus
+            onChange={onChangeUsername}
+            value={username}
+          />
+        &lt;/div>
+        &lt;div className="row">
+          &lt;label>Password:&lt;/label>
+          &lt;input type="password"
+            onChange={onChangePassword}
+            value={password}
+          />
+        &lt;/div>
+        &lt;div className="row submit">
+          {/* Pressing enter in either input invokes the first button. */}
+          &lt;button disabled={!canSubmit} onClick={this.onLogin}>
+            Log In
+          &lt;/button>
+          &lt;button disabled={!canSubmit}onClick={this.onSignup}>
+            Signup
+          &lt;/button>
+        &lt;/div>
+      &lt;/form>
+    );
+  }
+}
+
+export default Login;</pre>
+
+    <h4>src/main.js</h4>
+    <p>
+      This is the main page of the app where users can
+      view the ice cream flavors they like,
+      enter new ones, and delete existing ones.
+    </p>
+    <pre class="brush: js">
+import IceCreamEntry from './ice-cream-entry';
+import IceCreamList from './ice-cream-list';
+import React, {Component} from 'react';
+import 'whatwg-fetch';
+
+const {object, string} = React.PropTypes;
+
+function changeFlavor(event) {
+  React.setState({flavor: event.target.value});
+}
+
+function handleError(url, res) {
+  React.setState(res.status === 440 ?
+    {error: 'Session Timeout', route: 'login'} :
+    {error: res.message});
+}
+
+class Main extends Component {
+
+  static propTypes = {
+    flavor: string.isRequired,
+    // eslint-disable-next-line react/forbid-prop-types
+    iceCreamMap: object.isRequired,
+    restUrl: string.isRequired,
+    token: string.isRequired,
+    username: string.isRequired
+  };
+
+  /**
+   * Gets the current list of ice cream flavors
+   * liked by the current user.
+   */
+  componentDidMount() {
+    const {restUrl, token, username} = this.props;
+
+    // This header is used in all REST calls.
+    this.headers = {Authorization: token};
+
+    const url = `${restUrl}/ice-cream/${username}`;
+    fetch(url, {headers: this.headers})
+      .then(res => {
+        if (!res.ok) handleError(url, res);
+        return res.ok ? res.json() : null;
+      })
+      .then(iceCreams => {
+        const iceCreamMap = {};
+        for (const iceCream of iceCreams) {
+          iceCreamMap[iceCream.id] = iceCream.flavor;
+        }
+        React.setState({iceCreamMap});
+      })
+      .catch(handleError.bind(null, url));
+  }
+
+  /* eslint-disable no-invalid-this */
+
+  /**
+   * Adds an ice cream flavor to the list
+   * of those liked by the current user.
+   */
+  addIceCream = flavor => {
+    const {restUrl, username} = this.props;
+    const url = `${restUrl}/ice-cream/${username}?flavor=${flavor}`;
+    fetch(url, {method: 'POST', headers: this.headers})
+      .then(res => {
+        if (!res.ok) handleError(url, res);
+        return res.ok ? res.text() : null;
+      })
+      .then(id => {
+        if (!id) return;
+
+        // Now that it has been successfully added to the database,
+        // add it in the UI.
+        id = Number(id);
+        const {iceCreamMap} = this.props;
+        iceCreamMap[id] = flavor;
+        React.setState({flavor: '', iceCreamMap});
+      })
+      .catch(handleError.bind(null, url));
+  };
+
+  /**
+   * Deletes an ice cream flavor from the list
+   * of those liked by the current user.
+   */
+  deleteIceCream = id => {
+    const {restUrl, username} = this.props;
+    const url = `${restUrl}/ice-cream/${username}/${id}`;
+    fetch(url, {method: 'DELETE', headers: this.headers})
+      .then(res => {
+        if (res.ok) {
+          // Now that it has been successfully deleted from the database,
+          // delete it from the UI.
+          const {iceCreamMap} = this.props;
+          delete iceCreamMap[id];
+          React.setState({iceCreamMap});
+        } else {
+          handleError(url, res);
+        }
+      })
+      .catch(handleError.bind(null, url));
+  };
+
+  render() {
+    const {flavor, iceCreamMap, username} = this.props;
+    return (
+      &lt;div className="main">
+        &lt;IceCreamEntry
+          addCb={this.addIceCream}
+          changeCb={changeFlavor}
+          flavor={flavor}
+        />
+        &lt;label>{username}'s favorite flavors are:&lt;/label>
+        &lt;IceCreamList
+          deleteCb={this.deleteIceCream}
+          iceCreamMap={iceCreamMap}
+        />
+      &lt;/div>
+    );
+  }
+}
+
+export default Main;</pre>
+
+    <h4>src/ice-cream-entry.js</h4>
+    <p>
+      This component renders the components for
+      entering, viewing, and deleting ice cream flavors.
+    </p>
+    <pre class="brush: js">
+import React from 'react';
+
+const IceCreamEntry = ({addCb, changeCb, flavor}) =>
+  &lt;form
+    className="ice-cream-entry"
+    onSubmit={event => event.preventDefault()}
+  >
+    &lt;label>Flavor&lt;/label>
+    &lt;input type="text" autoFocus onChange={changeCb} value={flavor}/>
+    {/* using unicode heavy plus for button */}
+    &lt;button onClick={() => addCb(flavor)}>&#x2795;&lt;/button>
+  &lt;/form>;
+
+const {func, string} = React.PropTypes;
+IceCreamEntry.propTypes = {
+  addCb: func.isRequired,
+  changeCb: func.isRequired,
+  flavor: string.isRequired,
+};
+
+export default IceCreamEntry;</pre>
+
+    <h4>src/ice-cream-list.js</h4>
+    <p>
+      This component renders a sorted list of the ice cream flavors
+      that the user likes and allows them to be deleted.
+    </p>
+    <pre class="brush: js">
+import React from 'react';
+import IceCreamRow from './ice-cream-row';
+
+const IceCreamList = ({deleteCb, iceCreamMap}) => {
+  const list =
+    Object.keys(iceCreamMap).map(
+      id => ({id, flavor: iceCreamMap[id]}));
+  list.sort(
+    (a, b) => a.flavor.localeCompare(b.flavor));
+
+  return (
+    &lt;ul className="ice-cream-list">
+      {
+        list.map(iceCream =>
+          &lt;IceCreamRow
+            deleteCb={deleteCb}
+            id={iceCream.id}
+            key={iceCream.id}
+            flavor={iceCream.flavor}
+          />)
+      }
+    &lt;/ul>
+  );
+};
+
+const {func, object} = React.PropTypes;
+IceCreamList.propTypes = {
+  deleteCb: func.isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  iceCreamMap: object.isRequired
+};
+
+export default IceCreamList;</pre>
+
+    <h4>src/ice-cream-row.js</h4>
+    <p>
+      This component renders a single ice cream flavor
+      that the user likes and allows it to be deleted.
+    </p>
+    <pre class="brush: js">
+import React from 'react';
+
+const IceCreamRow = ({deleteCb, flavor, id}) =>
+  &lt;li className="ice-cream-row">
+    {/* using unicode heavy x for button */}
+    &lt;button onClick={() => deleteCb(id)}>&#x2716;&lt;/button>
+    {flavor}
+  &lt;/li>;
+
+const {func, string} = React.PropTypes;
+IceCreamRow.propTypes = {
+  deleteCb: func.isRequired,
+  flavor: string,
+  id: string
+};
+
+export default IceCreamRow;</pre>
+
+    <h3><a name="nodemon">nodemon</a></h3>
+    <p>
+      When iteratively making changes to REST service code,
+      it is convenient the have the REST server automatically restart
+      when changes are saved.
+      The npm package
+      <a href="https://github.com/remy/nodemon" target="_blank">nodemon</a>
+      monitors files in and below the current directory for changes.
+      When a change is detected, it restarts running of a specified JavaScript file.
+    </p>
+    <p>
+      To install it, enter: <code>npm install --save-dev nodemon</code><br>
+      To run it, enter: <code>nodemon {file-path}</code>.
     </p>
 
-    <h3>Start express server</h3>
+    <h3>SSL Certificates</h3>
     <p>
-      For development:
-    </p>
-    <pre>
-      cd server
-      sudo nodemon</pre>
-    <p>
-      For production:
-    </p>
-    <pre>
-      sudo node .</pre>
-
-    <h3>Write web app</h3>
-    <p>
-      Use create-react-app.
-    </p>
-    <p>
-      To start web server using HTTPS:
-    </p>
-    <pre>
-      export HTTPS=true
-      npm start
-      browse https://localhost:3000
-      press "Show Certificate" and select "Always Trust"</pre>
-    <p>
-      Tell browser to always trust the self-signed certificate
-      used by the REST server.
-      Browse https://localhost.
-
-      In Chrome, click the "ADVANCED" link,
-      click the "Proceed to localhost (unsafe)" link,
-      and ???.
-
-      In Firefox, press the "Advanced" button,
-      press the "Add Exception..." button,
-      and press the "Confirm Security Exception" button.
-
-      In Safari, press "Show Certificate" button.
-      In "When using this certificate" dropdown, select "Always Trust".
-      Press "Continue" button.
-      Enter your password to confirm this action.
-
       To view and delete certificates from Chrome,
       select "Chrome ... Preferences...", select "Settings",
       scroll to bottom, click "Show advanced settings...",
       scroll to "HTTPS/SSL", press the "Manage certificates..." button.
-      On a Mac this opens the "Keychain Access" application.
-
-      On a Mac, certificates can be viewed and deleted using the
-      "Keychain Access" app which is in Applications/Utilities.
-
-      After confirming the certificate,
-      browse https://localhost:3000 which is the web app URL.
+      On a Mac this opens the "Keychain Access" application
+      which is in Applications/Utilities.
     </p>
-    <h3>Add authentication with Passport</h3>
-    <p>
-    </p>
-    <pre>
-      npm install --save passport passport-local</pre>
 
     <h3>Wrap the application in a Docker container</h3>
     <p>
